@@ -7,3 +7,5 @@ venv/
 .env/
 
 memory/memories.json
+
+.DS_Store
