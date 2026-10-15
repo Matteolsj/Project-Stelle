@@ -1,30 +1,29 @@
 from core.persona import get_system_prompt
 from core.llm import ask_llm
 from core.memory import retrieve_memory
-from core.persona import get_system_prompt
+from core.conversation import Conversation
+import re
 
-def chat(user_input):
-    system_prompt = get_system_prompt()
-    messages = [
-        {"role" : "system", "content" : system_prompt},
-        {"role" : "user", "content" : user_input}
-        ]
-    response = ask_llm(messages)
-    return response
+def clean_response(text):
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)  # **gras**
+    text = re.sub(r"\*([^*]+)\*", r"\1", text)      # *italique*
+    return text
 
-def format_memories(memories):
-    res = """User memories:"""
-    for item in memories:
-        res += f"\n - {item["content"]}"
-    return res
+def format_memories(memories, max_items=5):
+    if not memories:
+        return ""
+    top = memories[:max_items]
+    res = "\n".join(f"- {item['content']}" for item in top)
+    return f"Things you remember about the user:\n{res}"
 
-def build_prompt(user_input, memory_context):
-    res = f"""{get_system_prompt()}\n{memory_context}\n\nUser Input:\n{user_input}"""
-    return res
-
-def brain(user_input):
+def brain(user_input, conversation: Conversation):
+    conversation.add_user(user_input)
     memories = retrieve_memory(user_input)
     memory_context = format_memories(memories)
-    prompt = build_prompt(user_input, memory_context)
-    response = chat(prompt)
+    messages = conversation.build_message(memory_context)
+    response = ask_llm(messages)
+    response = clean_response(response)
+    conversation.add_assistant(response)
+    conversation.trim()
+    conversation.save()
     return response

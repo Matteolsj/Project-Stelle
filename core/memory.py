@@ -5,7 +5,7 @@ from datetime import datetime
 from unidecode import unidecode
 
 BASE_DIR = Path(__file__).parents[1]
-PATH = Path(BASE_DIR / "memory" / "memories.json")
+PATH = Path(BASE_DIR / "data" / "memories.json")
 STOPWORDS = {
     "the", "a", "an", "in", "is", "to", "and", "i", "you", "it", "of", "for", "on", "with"
 }
@@ -22,6 +22,7 @@ def load(path=PATH):
 def save(path=PATH, content=None):
     if content is None:
         content = []
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(content, f, ensure_ascii=False, indent=2)
 

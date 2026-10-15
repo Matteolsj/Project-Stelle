@@ -1,11 +1,25 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
 venv/
-.env/
+.venv/
+env/
 
-memory/memories.json
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
 
+*.gguf
+*.bin
+
+data/*
+!data/.gitkeep
+
+.vscode/
+.idea/
+*.swp
 .DS_Store
+
+*.log
