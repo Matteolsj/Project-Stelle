@@ -16,7 +16,8 @@ def main():
             print("(history cleared)")
             continue
         response = brain(user_input, conversation)
-        print(f"{PERSONA["name"]}:", response)
+        print(f"{PERSONA['name']}: {response['reply']}")
+        print(f"[{response['emotion']} | {response['intensity']:.1f}]")
 
 if __name__ == "__main__":
     main()

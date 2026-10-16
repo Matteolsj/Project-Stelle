@@ -12,7 +12,7 @@ def ask_llm(messages):
     response = chat(
         model=MODEL,
         messages=messages,
-        #think=False,
+        think=False,
 	options={
             "temperature": 0.7,
             "top_p": 0.9,

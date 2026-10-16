@@ -20,12 +20,17 @@ class Conversation:
             "timestamp" : datetime.now().isoformat()
         })
 
-    def add_assistant(self, content):
-        self.history.append({
-            "role" : "assistant",
-            "content" : content,
-            "timestamp" : datetime.now().isoformat()
-        })
+    def add_assistant(self, content, emotion=None, intensity=None):
+        entry = {
+            "role": "assistant",
+            "content": content,
+            "timestamp": datetime.now().isoformat(),
+        }
+        if emotion is not None:
+            entry["emotion"] = emotion
+        if intensity is not None:
+            entry["intensity"] = intensity
+        self.history.append(entry)
 
     def trim(self):
         max_messages = 2 * MAX_TURNS

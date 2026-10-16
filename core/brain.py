@@ -2,12 +2,7 @@ from core.persona import get_system_prompt
 from core.llm import ask_llm
 from core.memory import retrieve_memory
 from core.conversation import Conversation
-import re
-
-def clean_response(text):
-    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)  # **gras**
-    text = re.sub(r"\*([^*]+)\*", r"\1", text)      # *italique*
-    return text
+from core.parser import parse_response
 
 def format_memories(memories, max_items=5):
     if not memories:
@@ -21,9 +16,12 @@ def brain(user_input, conversation: Conversation):
     memories = retrieve_memory(user_input)
     memory_context = format_memories(memories)
     messages = conversation.build_message(memory_context)
-    response = ask_llm(messages)
-    response = clean_response(response)
-    conversation.add_assistant(response)
+    raw = ask_llm(messages)
+    parsed = parse_response(raw)
+    conversation.add_assistant(
+        parsed["reply"],
+        parsed["emotion"],
+        parsed["intensity"])
     conversation.trim()
     conversation.save()
-    return response
+    return parsed
