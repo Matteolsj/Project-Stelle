@@ -18,7 +18,8 @@ def brain(user_input, conversation: Conversation):
     messages = conversation.build_message(memory_context)
     messages.append({"role": "assistant", "content": "{"})
     raw = ask_llm(messages)
-    raw = "{" + raw if not raw.lstrip().startswith("{") else raw
+    if not raw.lstrip().startswith("{"):
+        raw = "{" + raw    
     parsed = parse_response(raw)
     conversation.add_assistant(
         parsed["reply"],

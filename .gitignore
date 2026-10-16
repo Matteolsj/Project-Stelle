@@ -17,6 +17,9 @@ dist/
 data/*
 !data/.gitkeep
 
+voices/
+*.wav
+
 .vscode/
 .idea/
 *.swp
