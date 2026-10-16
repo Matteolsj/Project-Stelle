@@ -4,33 +4,43 @@ import re
 VALID_EMOTIONS = {"annoyed", "smug", "soft", "surprised", "happy"}
 
 def parse_response(raw):
-    fallback = {
-        "reply": raw.strip() if raw else "",
-        "emotion": "annoyed",
-        "intensity": 0.5,
-    }
     if not raw:
-        return fallback
+        return {"reply": "", "emotion": "annoyed", "intensity": 0.5}
+
     cleaned = raw.strip()
     cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
     cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
     match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-    if not match:
-        return fallback
-    
-    try:
-        data = json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return fallback
-    
-    reply = data.get("reply")
-    emotion = data.get("emotion")
+
+    data = None
+    if match:
+        try:
+            data = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            data = None
+
+    if not isinstance(data, dict):
+        data = {
+            "reply": cleaned,
+            "emotion": "annoyed",
+            "intensity": 0.5,
+        }
+
+    reply = data.get("reply", "")
+    emotion = data.get("emotion", "annoyed")
     intensity = data.get("intensity", 0.5)
 
-    if not isinstance(reply, str) or not reply.strip():
-        return fallback
+    if isinstance(reply, str):
+        reply = re.sub(r"\*\*([^*]+)\*\*", r"\1", reply)
+        reply = re.sub(r"\*([^*]+)\*", r"\1", reply)
+        reply = reply.strip()
+    else:
+        reply = ""
+
+    if not reply:
+        return {"reply": "", "emotion": "annoyed", "intensity": 0.5}
 
     if emotion not in VALID_EMOTIONS:
         emotion = "annoyed"
@@ -41,11 +51,8 @@ def parse_response(raw):
     except (ValueError, TypeError):
         intensity = 0.5
 
-    reply = re.sub(r"\*\*([^*]+)\*\*", r"\1", reply)
-    reply = re.sub(r"\*([^*]+)\*", r"\1", reply)
-
     return {
-        "reply": reply.strip(),
+        "reply": reply,
         "emotion": emotion,
         "intensity": intensity,
     }
