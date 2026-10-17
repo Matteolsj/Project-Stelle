@@ -1,8 +1,9 @@
 ollama
 unidecode
 piper-tts
+cascadevad-onnx
 onnxruntime
 sounddevice
 soundfile
 numpy
-cascadevad-onnx
+pydantic

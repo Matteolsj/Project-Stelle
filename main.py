@@ -9,13 +9,14 @@ def main():
     conversation = Conversation()
     tts = TTS()
     stt = STT()
-    tts_enabled = True
+    tts_enabled = False
     voice_mode = False
-    print("AI ready. Type 'exit' to quit.")
+    print("AI ready.")
     print("Commands: reset, reset history, reset memory, mute, unmute, voice (toggle voice input)")
+    print("Type 'exit' to quit.")
     while True:
         if voice_mode:
-            user_input = input("You [voice] (press Enter to speak, or type to skip): ").strip()
+            user_input = input("You [voice] (press Enter to speak): ").strip()
             if not user_input:
                 try:
                     user_input = stt.listen()

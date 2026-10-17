@@ -1,11 +1,5 @@
 from ollama import chat
 
-#MODEL = "llama3"
-#MODEL = "mistral"
-#MODEL = "phi3"
-#MODEL = "qwen3:0.6b"
-#MODEL = "qwen3:1.7b"
-#MODEL = "qwen3:4b"
 MODEL = "gemma3:4b"
 
 def ask_llm(messages):

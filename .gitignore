@@ -17,7 +17,9 @@ dist/
 data/*
 !data/.gitkeep
 
-voices/
+voices/*
+!voices/.gitkeep
+
 *.wav
 
 .vscode/
