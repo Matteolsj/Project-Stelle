@@ -1,5 +1,6 @@
 from core.brain import brain
 from core.persona import PERSONA
+from core.memory import reset_memory
 from core.conversation import Conversation
 from core.tts import TTS
 from core.stt import STT
@@ -11,7 +12,7 @@ def main():
     tts_enabled = True
     voice_mode = False
     print("AI ready. Type 'exit' to quit.")
-    print("Commands: reset, mute, unmute, voice (toggle voice input)")
+    print("Commands: reset, reset history, reset memory, mute, unmute, voice (toggle voice input)")
     while True:
         if voice_mode:
             user_input = input("You [voice] (press Enter to speak, or type to skip): ").strip()
@@ -31,9 +32,18 @@ def main():
             continue
         if user_input.lower() == "exit":
             break
-        if user_input.lower() == "reset":
+        if user_input.lower() == "reset history":
             conversation.reset()
             print("(history cleared)")
+            continue
+        if user_input.lower() == "reset memory":
+            reset_memory()
+            print("(memories cleared)")
+            continue
+        if user_input.lower() == "reset":
+            conversation.reset()
+            reset_memory()
+            print("(history and memories cleared)")
             continue
         if user_input.lower() == "mute":
             tts_enabled = False

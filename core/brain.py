@@ -1,8 +1,8 @@
-from core.persona import get_system_prompt
 from core.llm import ask_llm
-from core.memory import retrieve_memory
+from core.memory import retrieve_memory, add_or_replace
 from core.conversation import Conversation
 from core.parser import parse_response
+from core.extractor import extract_facts
 
 def format_memories(memories, max_items=5):
     if not memories:
@@ -27,4 +27,12 @@ def brain(user_input, conversation: Conversation):
         parsed["intensity"])
     conversation.trim()
     conversation.save()
+
+    facts = extract_facts(user_input)
+    for fact in facts:
+        res = add_or_replace(content=fact["content"], typeAdd=fact["type"])
+        if res == "added":
+            print(f"[Memory] Learned: {fact['content']}")
+        elif res == "replaced":
+            print(f"[Memory] Updated: {fact['content']}")
     return parsed
