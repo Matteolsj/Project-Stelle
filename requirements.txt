@@ -1,3 +1,8 @@
 ollama
 unidecode
 piper-tts
+onnxruntime
+sounddevice
+soundfile
+numpy
+cascadevad-onnx

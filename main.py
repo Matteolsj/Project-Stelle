@@ -2,14 +2,31 @@ from core.brain import brain
 from core.persona import PERSONA
 from core.conversation import Conversation
 from core.tts import TTS
+from core.stt import STT
 
 def main():
     conversation = Conversation()
     tts = TTS()
+    stt = STT()
     tts_enabled = True
+    voice_mode = False
     print("AI ready. Type 'exit' to quit.")
+    print("Commands: reset, mute, unmute, voice (toggle voice input)")
     while True:
-        user_input = input("You: ").strip()
+        if voice_mode:
+            user_input = input("You [voice] (press Enter to speak, or type to skip): ").strip()
+            if not user_input:
+                try:
+                    user_input = stt.listen()
+                    print(f"You said: {user_input}")
+                except Exception as e:
+                    print(f"[STT error] {e}")
+                    continue
+                if not user_input:
+                    print("(no speech detected)")
+                    continue
+        else:
+            user_input = input("You: ").strip()
         if not user_input:
             continue
         if user_input.lower() == "exit":
@@ -25,6 +42,11 @@ def main():
         if user_input.lower() == "unmute":
             tts_enabled = True
             print("(unmuted)")
+            continue
+        if user_input.lower() == "voice":
+            voice_mode = not voice_mode
+            state = "on" if voice_mode else "off"
+            print(f"(voice input {state})")
             continue
         response = brain(user_input, conversation)
         print(f"{PERSONA['name']}: {response['reply']}")
