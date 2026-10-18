@@ -4,6 +4,12 @@ from core.memory import reset_memory
 from core.conversation import Conversation
 from core.tts import TTS
 from core.stt import STT
+import subprocess
+import sys
+from pathlib import Path
+
+avatar_script = Path(__file__).parent / "core" / "avatar.py"
+avatar_process = subprocess.Popen([sys.executable, str(avatar_script)])
 
 def main():
     conversation = Conversation()
@@ -32,6 +38,7 @@ def main():
         if not user_input:
             continue
         if user_input.lower() == "exit":
+            avatar_process.terminate()
             break
         if user_input.lower() == "reset history":
             conversation.reset()
