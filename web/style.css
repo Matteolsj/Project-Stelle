@@ -1,0 +1,111 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#avatar {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    background-color: #AAB7B8;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+#emotion-label {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    text-transform: capitalize;
+}
+
+#stelle-text {
+    font-size: 1.4em;
+    min-height: 60px;
+    max-width: 500px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #cdd6f4;
+}
+
+#input-area {
+    display: flex;
+    gap: 10px;
+}
+
+#message-input {
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    width: 400px;
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+#send-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#send-btn:disabled {
+    background-color: #585b70;
+    cursor: not-allowed;
+}
+
+#status {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #a6adc8;
+}
+
+#controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#controls button {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #45475a;
+    color: #cdd6f4;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    transition: background-color 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#controls button:hover {
+    background-color: #585b70;
+}
+
+#controls button.active {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+#controls button svg {
+    pointer-events: none;
+    display: block;
+}

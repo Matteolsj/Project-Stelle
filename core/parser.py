@@ -1,5 +1,6 @@
 import json
 import re
+import unicodedata
 
 VALID_EMOTIONS = {"annoyed", "smug", "soft", "surprised", "happy"}
 
@@ -8,8 +9,12 @@ def parse_response(raw):
         return {"reply": "", "emotion": "annoyed", "intensity": 0.5}
 
     cleaned = raw.strip()
+    cleaned = unicodedata.normalize("NFKC", cleaned)
     cleaned = cleaned.replace("\u201c", '"').replace("\u201d", '"')
     cleaned = cleaned.replace("\u2018", "'").replace("\u2019", "'")
+    cleaned = cleaned.replace("，", ",")
+    cleaned = cleaned.replace("：", ":")
+    cleaned = cleaned.replace("｛", "{").replace("｝", "}")
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
     match = re.search(r"\{.*\}", cleaned, re.DOTALL)

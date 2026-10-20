@@ -91,7 +91,8 @@ class STT:
             "-f", wav_path,
             "-otxt",
             "-of", output_prefix,
-            "--no-prints"
+            "--no-prints",
+            "--prompt", "Stelle is a tsundere AI companion. The user is talking to Stelle. Spell it S-t-e-l-l-e."
         ]
         subprocess.run(cmd, check=True, capture_output=True, text=True)
         txt_path = output_prefix + ".txt"

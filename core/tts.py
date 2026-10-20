@@ -49,3 +49,13 @@ class TTS:
             subprocess.run(["afplay", tmp_path], check=False)
         finally:
             Path(tmp_path).unlink(missing_ok=True)
+
+    def synthesize_to_file(self, text, output_path):
+        if not text or not text.strip():
+            return None
+        cleaned = clean_for_tts(text)
+        if not cleaned:
+            return None
+        with wave.open(str(output_path), "wb") as wav_file:
+            self.voice.synthesize_wav(cleaned, wav_file, syn_config=self.syn_config)
+        return output_path

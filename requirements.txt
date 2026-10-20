@@ -7,3 +7,6 @@ sounddevice
 soundfile
 numpy
 pydantic
+fastapi
+uvicorn[standard]
+websockets
