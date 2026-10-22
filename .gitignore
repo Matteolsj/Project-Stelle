@@ -22,6 +22,14 @@ voices/*
 
 *.wav
 
+web/vad/*.wasm
+web/vad/*.onnx
+web/vad/*.mjs
+web/vad/bundle.min.js
+web/vad/ort.wasm.min.js
+web/vad/vad.worklet.bundle.min.js
+!web/vad/.gitkeep
+
 .vscode/
 .idea/
 *.swp

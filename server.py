@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -7,7 +7,7 @@ import json
 import tempfile
 import asyncio
 import re
-
+import threading
 from core.brain import brain
 from core.conversation import Conversation
 from core.tts import TTS
@@ -16,17 +16,51 @@ from core.stt import STT
 
 WEB_DIR = Path(__file__).parent / "web"
 WEB_DIR.mkdir(exist_ok=True)
+ALLOWED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
 
 app = FastAPI()
 app.mount("/web", StaticFiles(directory=WEB_DIR), name="web")
 
 conversation = Conversation()
-tts = TTS()
-stt = STT()
-
 executor = ThreadPoolExecutor(max_workers=2)
+conversation_lock = asyncio.Lock()
+init_lock = threading.Lock()
+
+tts_instance = None
+stt_instance = None
+
+def get_tts():
+    global tts_instance
+    if tts_instance is not None:
+        return tts_instance
+    with init_lock:
+        if tts_instance is None:
+            try:
+                tts_instance = TTS()
+            except FileNotFoundError as e:
+                print(f"[TTS] Warning: Cannot load voice model: {e}")
+                print("[TTS] Text chat will work, but audio output is disabled.")
+                return None
+        return tts_instance
+
+def get_stt():
+    global stt_instance
+    if stt_instance is not None:
+        return stt_instance
+    with init_lock:
+        if stt_instance is None:
+            try:
+                stt_instance = STT()
+            except Exception as e:
+                print(f"[STT] Warning: Cannot load STT: {e}")
+                print("[STT] Voice input is disabled.")
+                return None
+        return stt_instance
 
 def generate_audio(text):
+    tts = get_tts()
+    if tts is None:
+        return None
     with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp:
         tmp_path = Path(tmp.name)
         tmp.close()
@@ -45,6 +79,11 @@ async def get():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    origin = websocket.headers.get("origin")
+    if origin not in ALLOWED_ORIGINS:
+        print(f"[WS] Connection refused from unauthorized origin: {origin}")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
     await websocket.accept()
     print("[WS] Client connected")
     loop = asyncio.get_event_loop()
@@ -60,8 +99,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     cmd = json.loads(text_data)
                     if isinstance(cmd, dict) and cmd.get("command") == "reset":
-                        conversation.reset()
-                        reset_memory()
+                        async with conversation_lock:
+                            conversation.reset()
+                            reset_memory()
                         print("[WS] Reset done")
                         await websocket.send_text(json.dumps({
                             "reply": "(history and memories cleared)",
@@ -72,7 +112,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 except json.JSONDecodeError:
                     pass
 
-                response = await loop.run_in_executor(executor, brain, text_data, conversation)
+                async with conversation_lock:
+                    response = await loop.run_in_executor(executor, brain, text_data, conversation)
 
                 await websocket.send_text(json.dumps({
                     "reply": response["reply"],
@@ -81,9 +122,18 @@ async def websocket_endpoint(websocket: WebSocket):
                 }))
                 
                 audio_bytes = await loop.run_in_executor(executor, generate_audio, response["reply"])
-                await websocket.send_bytes(audio_bytes)
+                if audio_bytes:
+                    await websocket.send_bytes(audio_bytes)
 
             elif "bytes" in data:
+                stt = await loop.run_in_executor(executor, get_stt)
+                if stt is None:
+                    await websocket.send_text(json.dumps({
+                        "reply": "(Voice input is not available. Please install the Whisper model.)",
+                        "emotion": "annoyed",
+                        "intensity": 0.3,
+                    }))
+                    continue
                 audio_data = data["bytes"]
                 print(f"[WS] Received audio: {len(audio_data)} bytes")
 
@@ -107,8 +157,9 @@ async def websocket_endpoint(websocket: WebSocket):
                         continue
 
                     await websocket.send_text(json.dumps({"transcription": cleaned_text}))
-                    
-                    response = await loop.run_in_executor(executor, brain, cleaned_text, conversation)
+
+                    async with conversation_lock:
+                        response = await loop.run_in_executor(executor, brain, cleaned_text, conversation)
                     
                     await websocket.send_text(json.dumps({
                         "reply": response["reply"],
@@ -117,8 +168,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     }))
                     
                     audio_bytes = await loop.run_in_executor(executor, generate_audio, response["reply"])
-                    await websocket.send_bytes(audio_bytes)
-
+                    if audio_bytes:
+                        await websocket.send_bytes(audio_bytes)
                 finally:
                     wav_path.unlink(missing_ok=True)
 

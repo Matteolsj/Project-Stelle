@@ -56,10 +56,38 @@ mkdir -p ~/Library/Application\ Support/whisper-cpp/models/
 curl -L -o ~/Library/Application\ Support/whisper-cpp/models/ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin
 ```
 
+### VAD Files
+
+Download the VAD (Voice Activity Detection) files (one time only):
+
+```bash
+python scripts/download_vad.py
+```
+
 ## Run
+
+### Web Interface (recommended)
 
 ```bash
 python main.py
+```
+
+This starts the FastAPI server and opens your browser at http://127.0.0.1:8000.
+
+The web interface provides:
+
+- `Text chat`: type your message in the input field and press Enter.
+- `Voice input`: click the microphone button to start listening. Speak naturally, and the VAD will automatically detect when you stop. The transcription is then sent to Stelle.
+- `Avatar`: a colored rectangle that changes color based on Stelle's detected emotion.
+- `Controls`:
+  - `Reset` (circular arrow icon): clears both conversation history and long-term memories.
+  - `Mute/Unmute` (speaker icon): toggles the text-to-speech audio (muted by default).
+  - `Voice` (microphone icon): toggles continuous voice input mode. The microphone fills in when active.
+
+### Terminal Interface
+
+```bash
+python main_cli.py
 ```
 
 Available commands in chat:
@@ -84,10 +112,20 @@ Available commands in chat:
   - `persona.py`: Stelle's personality and system prompt
   - `stt.py`: speech-to-text with whisper.cpp + Silero VAD
   - `tts.py`: Piper text-to-speech with cleanup for pronounceability
-- `scripts/`:
+- `web/`: web interface
+  - `index.html`: main page
+  - `style.css`: styles
+  - `script.js`: WebSocket, VAD, and TTS logic
+  - `vad/`: VAD files (downloaded via script, not committed)
+- `scripts/`: utility scripts
   - `download_voice.py`: downloads the Piper voice model
+  - `download_vad.py`: downloads the VAD files
+  - `utils.py`: shared functions (SHA256 hashing and download)
 - `data/`: runtime data (memories and history), created automatically on first run, not committed
 - `voices/`: Piper voice models, not committed (downloaded via script)
+- `main.py`: launches the web server and opens the browser
+- `main_cli.py`: terminal-based interface (alternative)
+- `server.py`: FastAPI server with WebSocket endpoint
 
 ## How it works
 
@@ -153,7 +191,8 @@ This project would not be possible without the following open-source tools and m
 - **whisper.cpp** by Georgi Gerganov — local speech-to-text transcription (MIT License).
 - **Silero VAD** — voice activity detection.
 - **cascadevad-onnx** — ONNX runtime wrapper for Silero VAD.
-- **PyQt6** — GUI framework (for the upcoming avatar).
+- **FastAPI** — web framework for the server.
+- **ONNX Runtime Web** and **@ricky0123/vad-web** — browser-based VAD.
 
 ## License
 

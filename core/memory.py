@@ -21,14 +21,22 @@ VERBS = {
     "didn't", "isn't", "wasn't", "won't", "can't", "cannot",
 }
 
+class MemoryCorruptedError(Exception):
+    pass
+
 def load(path=PATH):
     if not path.exists():
         return []
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except json.JSONDecodeError:
-        return []
+    except json.JSONDecodeError as e:
+        print(f"[Memory] Error : File {path} is corrupted.")
+        backup_path = path.with_suffix(".json.corrupt")
+        import shutil
+        shutil.copy(path, backup_path)
+        print(f"[Memory] Backup copy has been created : {backup_path}")
+        raise MemoryCorruptedError(f"File {path} is not readable.")
     
 def save(path=PATH, content=None):
     if content is None:
@@ -66,13 +74,24 @@ def clean(text):
     return text
 
 def retrieve_memory(user_input, path=PATH):
-    data = load(path)
+    try:
+        data = load(path)
+    except MemoryCorruptedError:
+        print("[Memory] Warning: memories.json is corrupted, ignoring memories for this message.")
+        return []
+    if not isinstance(data, list):
+        print("[Memory] Warning: memories.json root is not a list, ignoring memories.")
+        return []
     user_input_clean = clean(user_input)
     user_input_words = set(user_input_clean.split())
     user_input_words = {delete_s(word) for word in user_input_words if word not in STOPWORDS}
     res = []
     for memory in data:
-        score = 0
+        if not isinstance(memory, dict):
+            continue
+        content = memory.get("content")
+        if not isinstance(content, str) or not content.strip():
+            continue
         memory_clean = clean(memory["content"])
         memory_words = set(memory_clean.split())
         memory_words = {delete_s(word) for word in memory_words if word not in STOPWORDS}
@@ -89,32 +108,37 @@ def extract_subject(content):
     words = clean(content).split()
     return {w for w in words if w not in VERBS and w not in STOPWORDS}
 
-def find_similar_fact(content, path=PATH):
-    data = load(path)
+def find_similar_fact(content, data=None, path=PATH):
+    if data is None:
+        data = load(path)
     target_subject = extract_subject(content)
     if not target_subject:
         return -1
     for i, memory in enumerate(data):
-        existing_subject = extract_subject(memory.get("content", ""))
+        if not isinstance(memory, dict):
+            continue
+        existing_content = memory.get("content")
+        if not isinstance(existing_content, str) or not existing_content.strip():
+            continue
+        existing_subject = extract_subject(existing_content)
         if not existing_subject:
             continue
         common = target_subject & existing_subject
-        if (
-            target_subject == existing_subject
-            or len(common) >= 2
-            or target_subject.issubset(existing_subject)
-            or existing_subject.issubset(target_subject)
-        ):
+        if target_subject == existing_subject or len(common) >= 2:
             return i
     return -1
 
 def add_or_replace(content, typeAdd="fact", path=PATH):
-    data = load(path)
+    try:
+        data = load(path)
+    except MemoryCorruptedError:
+        print("[Memory] Skipped to avoid losing data.")
+        return "skipped"
     if not isinstance(data, list):
         print("JSON root must be a list")
         return "skipped"
     
-    index = find_similar_fact(content, path)
+    index = find_similar_fact(content, data=data, path=path)
     if index>=0:
         data[index] = {
             "type": typeAdd,

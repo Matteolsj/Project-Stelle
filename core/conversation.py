@@ -55,9 +55,35 @@ class Conversation:
         try:
             with open(HISTORY_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.history = data.get("history", [])
-        except (json.JSONDecodeError, KeyError):
+        except json.JSONDecodeError:
+            print("[Conversation] Warning: history.json is corrupted, starting fresh.")
             self.history = []
+            return
+
+        if not isinstance(data, dict):
+            print("[Conversation] Warning: history.json root is not an object, starting fresh.")
+            self.history = []
+            return
+
+        raw_history = data.get("history", [])
+
+        if not isinstance(raw_history, list):
+            print("[Conversation] Warning: 'history' is not a list, starting fresh.")
+            self.history = []
+            return
+
+        valid_history = []
+        for msg in raw_history:
+            if (
+            isinstance(msg, dict)
+            and isinstance(msg.get("role"), str)
+            and isinstance(msg.get("content"), str)
+            and msg["role"] in ("user", "assistant")
+            ):
+                valid_history.append(msg)
+            else:
+                print(f"[Conversation] Warning: skipping invalid message: {msg!r}")
+        self.history = valid_history
 
     def save(self):
         HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)

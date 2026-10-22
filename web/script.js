@@ -85,8 +85,9 @@ async function startVAD() {
             onVADMisfire: () => {
                 console.log("Too short, ignoring");
             },
-            onnxWASMBasePath: "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/",
-            baseAssetPath: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.31/dist/",
+            model: "v5",
+            baseAssetPath: "/web/vad/",
+            onnxWASMBasePath: "/web/vad/"
         });
         
         myvad.start();
@@ -116,19 +117,24 @@ async function unlockAudio() {
 }
 
 function connect() {
-    ws = new WebSocket(`ws://${window.location.host}/ws`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    ws = new WebSocket(wsUrl);
     ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
         statusDiv.textContent = "Connected";
         statusDiv.style.color = "#a6e3a1";
         sendBtn.disabled = false;
+        messageInput.disabled = false;
     };
 
     ws.onclose = () => {
         statusDiv.textContent = "Disconnected";
         statusDiv.style.color = "#f38ba8";
         sendBtn.disabled = true;
+        messageInput.disabled = true;
+        stelleText.textContent = "Connection lost. Reconnecting...";
         setTimeout(connect, 2000);
     };
 
@@ -144,6 +150,8 @@ function connect() {
 
             if (data.transcription) {
                 stelleText.textContent = `You: "${data.transcription}"`;
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
                 return;
             }
 
@@ -154,6 +162,10 @@ function connect() {
             }
 
             stelleText.textContent = data.reply;
+
+            sendBtn.disabled = false;
+            messageInput.disabled = false;
+            messageInput.focus();
         }
         else {
             if (!ttsEnabled) return;
