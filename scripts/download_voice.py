@@ -1,5 +1,5 @@
 from pathlib import Path
-from utils import download_file
+from scripts.utils import download_file
 
 VOICES_DIR = Path(__file__).parents[1] / "voices"
 

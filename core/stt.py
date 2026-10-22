@@ -1,4 +1,3 @@
-import os
 import tempfile
 import time
 import subprocess
@@ -7,10 +6,11 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 from cascadevad import load_vad
+from scripts.utils import get_whisper_model_path
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
-WHISPER_MODEL = os.path.expanduser("~/Library/Application Support/whisper-cpp/models/ggml-base.en.bin")
+WHISPER_MODEL = get_whisper_model_path()
 
 VAD_THRESHOLD = 0.5
 MIN_SILENCE_MS = 700
@@ -20,9 +20,10 @@ AMPLITUDE_THRESHOLD = 0.005
 
 class STT:
     def __init__(self, model_path=WHISPER_MODEL):
-        if not Path(model_path).exists():
+        model_path = Path(model_path)
+        if not model_path.exists():
             raise FileNotFoundError(f"Whisper model not found: {model_path}")
-        self.model_path = model_path
+        self.model_path = str(model_path)
         print("[STT] Loading Silero VAD...")
         self.vad = load_vad()
         print("[STT] Silero VAD loaded.")

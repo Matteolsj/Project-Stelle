@@ -4,6 +4,22 @@ A tsundere AI companion running fully locally with Ollama, with persistent memor
 
 ## Requirements
 
+This project runs entirely on your machine. Here's what you need:
+
+### Supported Platforms
+
+- **Tested on**: macOS 27.2 RC (26B5101f), with Apple Silicon (M1).
+- **Should work on**: macOS Sonoma (14) or newer. Linux and Windows may work, but have not been tested. You will need to install whisper.cpp and configure its model path manually (see the [whisper.cpp repository](https://github.com/ggerganov/whisper.cpp)).
+- **Not supported**: Mobile OS (iOS, Android), and any platform where Ollama or whisper.cpp cannot run.
+
+### Hardware
+
+- **RAM**: 8 GB is the absolute minimum for Gemma 3 4B, but **16 GB is strongly recommended** if you plan to use TTS and STT simultaneously. On 8 GB, you may experience slowdowns when all components are loaded at once.
+- **Disk**: ~5 GB for the LLM, TTS voice, and Whisper model.
+- **CPU/GPU**: Apple Silicon is ideal. Intel Macs will work but may be slower. On Windows/Linux, performance depends on your hardware configuration.
+
+### Software
+
 - Python 3.10+
 - [Ollama](https://ollama.com) installed and running
 - The Gemma 3 4B model:
@@ -18,16 +34,7 @@ ollama pull gemma3:4b
 brew install whisper-cpp
 ```
 
-- A Piper voice model (downloaded separately, see below)
-
-### Hardware
-
-This project runs entirely on your machine. Here's what you need:
-
-- **OS**: macOS Sonoma (14) or newer, or Linux/Windows (Ollama supports all three, but this project was tested on macOS).
-- **RAM**: 8 GB is the absolute minimum for Gemma 3 4B, but **16 GB is strongly recommended** if you plan to use TTS and STT simultaneously. On 8 GB, you may experience slowdowns when all components are loaded at once.
-- **Disk**: ~5 GB for the LLM, TTS voice, and Whisper model.
-- **CPU/GPU**: Apple Silicon (M1/M2/M3/M4) is ideal. Intel Macs and Windows/Linux machines will work but will be slower (CPU-only inference for the LLM).
+- A Piper voice model (downloaded separately via script, see below)
 
 ## Setup
 
@@ -37,32 +44,23 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Voice Model
+### Download Models
 
-Download the Piper voice model (one time only):
-
-```bash
-python scripts/download_voice.py
-```
-
-This will download en_US-libritts_r-medium.onnx and its config file into voices/.
-
-### Whisper Model
-
-Download the whisper.cpp base.en model (one time only):
+Download the voice model, browser VAD files, and Whisper model with:
 
 ```bash
-mkdir -p ~/Library/Application\ Support/whisper-cpp/models/
-curl -L -o ~/Library/Application\ Support/whisper-cpp/models/ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin
+python -m scripts.download_all
 ```
 
-### VAD Files
+This will download:
+- Piper voice model in `voices/`
+- VAD files in `web/vad/`
+- Whisper model in:
+  - `~/Library/Application Support/whisper-cpp/models/` (macOS)
+  - `%APPDATA%\whisper-cpp\models\` (Windows)
+  - `~/.local/share/whisper-cpp/models/` (Linux)
 
-Download the VAD (Voice Activity Detection) files (one time only):
-
-```bash
-python scripts/download_vad.py
-```
+**Note**: This requires an internet connection (one-time setup). Gemma is downloaded separately with `ollama pull gemma3:4b` above. After all required models are downloaded, Stelle runs locally without cloud APIs.
 
 ## Run
 
@@ -118,14 +116,16 @@ Available commands in chat:
   - `script.js`: WebSocket, VAD, and TTS logic
   - `vad/`: VAD files (downloaded via script, not committed)
 - `scripts/`: utility scripts
+  - `download_whisper.py`: downloads the Whisper model
   - `download_voice.py`: downloads the Piper voice model
   - `download_vad.py`: downloads the VAD files
-  - `utils.py`: shared functions (SHA256 hashing and download)
+  - `download_all.py`: downloads all models at once
+  - `utils.py`: shared functions (SHA256 hashing, download, OS paths)
 - `data/`: runtime data (memories and history), created automatically on first run, not committed
 - `voices/`: Piper voice models, not committed (downloaded via script)
 - `main.py`: launches the web server and opens the browser
 - `main_cli.py`: terminal-based interface (alternative)
-- `server.py`: FastAPI server with WebSocket endpoint
+- `server.py`: FastAPI server with WebSocket endpoint (launched by main.py)
 
 ## How it works
 

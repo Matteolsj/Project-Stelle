@@ -1,5 +1,8 @@
+import os
+import platform
 import hashlib
 import sys
+from pathlib import Path
 from urllib.request import urlretrieve
 
 def compute_hash(file_path):
@@ -36,3 +39,20 @@ def download_file(url, dest, expected_hash):
             tmp.unlink()
         print(f"[error] Failed to download {filename}: {e}")
         sys.exit(1)
+
+def get_whisper_model_path(filename="ggml-base.en.bin"):
+    env_path = os.environ.get("WHISPER_MODEL_PATH")
+    if env_path:
+        return Path(env_path)
+    system = platform.system()
+    if system == "Darwin":
+        base = Path("~/Library/Application Support/whisper-cpp/models").expanduser()
+    elif system == "Windows":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            base = Path(appdata) / "whisper-cpp" / "models"
+        else:
+            base = Path.home() / "AppData" / "Roaming" / "whisper-cpp" / "models"
+    else:
+        base = Path("~/.local/share/whisper-cpp/models").expanduser()
+    return base / filename
