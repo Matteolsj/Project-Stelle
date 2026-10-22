@@ -5,13 +5,17 @@ const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
 const statusDiv = document.getElementById('status');
 
-const EMOTION_COLORS = {
-    "annoyed": "#E74C3C",
-    "soft": "#F5B7B1",
-    "smug": "#F4D03F",
-    "surprised": "#AF7AC5",
-    "happy": "#58D68D"
+const SPRITES = {
+    "annoyed": new Image(),
+    "soft": new Image(),
+    "smug": new Image(),
+    "surprised": new Image(),
+    "happy": new Image()
 };
+
+for (const [emotion, img] of Object.entries(SPRITES)) {
+    img.src = `/web/sprites/${emotion}.png`;
+}
 
 let ttsEnabled = false;
 let voiceMode = false;
@@ -155,9 +159,8 @@ function connect() {
                 return;
             }
 
-            if (data.emotion) {
-                const color = EMOTION_COLORS[data.emotion] || "#AAB7B8";
-                avatar.style.backgroundColor = color;
+            if (data.emotion && SPRITES[data.emotion]) {
+                avatar.src = SPRITES[data.emotion].src;
                 emotionLabel.textContent = `Emotion : ${data.emotion}`;
             }
 

@@ -27,12 +27,14 @@ def brain(user_input, conversation: Conversation):
         parsed["intensity"])
     conversation.trim()
     conversation.save()
-
-    facts = extract_facts(user_input)
-    for fact in facts:
-        res = add_or_replace(content=fact["content"], typeAdd=fact["type"])
-        if res == "added":
-            print(f"[Memory] Learned: {fact['content']}")
-        elif res == "replaced":
-            print(f"[Memory] Updated: {fact['content']}")
+    try:
+        facts = extract_facts(user_input)
+        for fact in facts:
+            res = add_or_replace(content=fact["content"], typeAdd=fact["type"])
+            if res == "added":
+                print(f"[Memory] Learned: {fact['content']}")
+            elif res == "replaced":
+                print(f"[Memory] Updated: {fact['content']}")
+    except Exception as e:
+        print(f"[Memory] Extraction error: {e}")
     return parsed
