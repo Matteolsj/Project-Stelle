@@ -11,7 +11,7 @@ def open_browser():
 def main():
     threading.Thread(target=open_browser, daemon=True).start()
     print("Starting server at http://127.0.0.1:8000")
-    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=False, log_level="warning")
+    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=False, log_level="warning", ws_max_size=6 * 1024 * 1024)
 
 if __name__ == "__main__":
     main()

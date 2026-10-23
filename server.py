@@ -105,8 +105,6 @@ async def websocket_endpoint(websocket: WebSocket):
                         print("[WS] Reset done")
                         await websocket.send_text(json.dumps({
                             "reply": "(history and memories cleared)",
-                            "emotion": "annoyed",
-                            "intensity": 0.3,
                         }))
                         continue
                 except json.JSONDecodeError:
@@ -126,6 +124,17 @@ async def websocket_endpoint(websocket: WebSocket):
                     await websocket.send_bytes(audio_bytes)
 
             elif "bytes" in data:
+                audio_data = data["bytes"]
+
+                if len(audio_data) > 6 * 1024 * 1024:
+                    print("[WS] Audio message too large, ignoring.")
+                    await websocket.send_text(json.dumps({
+                        "reply": "(Audio too large, please speak for a shorter time.)",
+                        "emotion": "annoyed",
+                        "intensity": 0.3
+                    }))
+                    continue
+
                 stt = await loop.run_in_executor(executor, get_stt)
                 if stt is None:
                     await websocket.send_text(json.dumps({
@@ -134,7 +143,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         "intensity": 0.3,
                     }))
                     continue
-                audio_data = data["bytes"]
+
                 print(f"[WS] Received audio: {len(audio_data)} bytes")
 
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:

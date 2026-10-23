@@ -1,54 +1,98 @@
+html {
+    font-size: clamp(14px, 1.2vw, 20px);
+}
+
 body {
     font-family: Helvetica, Arial, sans-serif;
     background-color: #1e1e2e;
     color: #cdd6f4;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
     margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    font-size: 1rem;
+}
+
+#live2d-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 1;
+    pointer-events: none;
 }
 
 #avatar {
-    width: 500px;
-    height: 500px;
-    max-width: 90vw;
-    height: auto;
-    aspect-ratio: 1 / 1;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 90vh;
+    width: auto;
+    max-width: 100vw;
+    z-index: -1;
+    pointer-events: none;
     object-fit: contain;
-    background-color: transparent;
-    margin-bottom: 20px;
-    transition: opacity 0.2s ease;
-    border-radius: 5%;
+}
+
+#ui-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 20px;
+    z-index: 10;
+    pointer-events: none;
+    padding-bottom: 1.5rem;
+}
+
+#ui-container > * {
+    pointer-events: auto;
 }
 
 #emotion-label {
-    font-size: 1.2em;
-    margin-bottom: 10px;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    padding: 0.3rem 1rem;
     text-transform: capitalize;
+    background-color: rgba(30, 30, 46, 0.7);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
 }
 
 #stelle-text {
-    font-size: 1.4em;
-    min-height: 60px;
-    max-width: 500px;
+    font-size: 1.1rem;
+    max-width: 40rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
     text-align: center;
-    margin-bottom: 20px;
     color: #cdd6f4;
+    background-color: rgba(30, 30, 46, 0.7);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
 }
 
 #input-area {
+    gap: 0.6rem;
+    padding: 0.6rem;
+    margin-bottom: 0.6rem;
     display: flex;
-    gap: 10px;
+    background-color: rgba(30, 30, 46, 0.7);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
 }
 
 #message-input {
-    padding: 10px;
-    font-size: 1em;
+    font-size: 1rem;
+    padding: 0.6rem;
+    width: 22rem;
     border-radius: 8px;
     border: none;
-    width: 400px;
     background-color: #313244;
     color: #cdd6f4;
 }
@@ -70,19 +114,29 @@ body {
 }
 
 #status {
-    margin-top: 10px;
-    font-size: 0.9em;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    padding: 0.3rem 1rem;
     color: #a6adc8;
+    background-color: rgba(30, 30, 46, 0.7);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
 }
 
 #controls {
     display: flex;
-    gap: 10px;
+    gap: 0.6rem;
+    padding: 0.5rem;
     margin-top: 10px;
+    background-color: rgba(30, 30, 46, 0.7);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
 }
 
 #controls button {
-    padding: 10px;
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0.6rem;
     border-radius: 8px;
     border: none;
     background-color: #45475a;
@@ -91,13 +145,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
     transition: background-color 0.2s;
     user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
 #controls button:hover {
@@ -110,6 +159,8 @@ body {
 }
 
 #controls button svg {
+    width: 1.2rem;
+    height: 1.2rem;
     pointer-events: none;
     display: block;
 }

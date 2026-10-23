@@ -2,7 +2,7 @@ import json
 import re
 import unicodedata
 
-VALID_EMOTIONS = {"annoyed", "smug", "soft", "surprised", "happy"}
+VALID_EMOTIONS = {"annoyed", "smug", "soft", "surprised", "sad"}
 
 def parse_response(raw):
     if not raw:
