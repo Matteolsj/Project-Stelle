@@ -1,6 +1,13 @@
 # Project Stelle
 
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10%2B-yellow.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)
+![Ollama](https://img.shields.io/badge/Ollama-Local-black.svg)
+
 A tsundere AI companion running fully locally with Ollama, with persistent memory, emotion detection, text-to-speech, speech-to-text, and automatic fact extraction.
+
+![Project Stelle Demo](.github/assets/demo.gif)
 
 ## Requirements
 
