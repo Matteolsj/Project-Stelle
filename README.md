@@ -269,4 +269,6 @@ This project would not be possible without the following open-source tools and m
 
 ## License
 
-MIT. Feel free to clone, modify, and build your own waifu voice companion!
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Feel free to clone, modify, and build your own waifu companion!
